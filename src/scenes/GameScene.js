@@ -1,268 +1,189 @@
+/* eslint-disable class-methods-use-this */
 import Phaser from 'phaser';
-import Player from '../Entities/Player';
-import ChaserShip from '../Entities/ChaserShip';
-import GunShip from '../Entities/GunShip';
-import CarrierShip from '../Entities/CarrierShip';
 
 export default class GameScene extends Phaser.Scene {
-    constructor() {
-        super('Game');
+  constructor() {
+    super('Game');
+    this.gameOver = false;
+    this.score = 0;
+  }
+
+  init() {
+    this.gameOver = false;
+  }
+
+  create() {
+    this.model = this.sys.game.globals.model;
+
+    // create background
+    this.sky = this.add.tileSprite(400, 300, 800, 600, 'sky');
+    // add jet
+    this.jet = this.physics.add.image(400, 500, 'jet').setScale(0.12);
+    this.jet.setCollideWorldBounds(true);
+
+    // set cursors to control jet
+    this.cursors = this.input.keyboard.createCursorKeys();
+
+    // add bombs group
+    this.bombs = this.physics.add.group({
+      key: 'bomb',
+      repeat: 3,
+      setXY: {
+        x: 20,
+        y: 50,
+        stepX: Phaser.Math.Between(10, 400 - 15),
+        stepY: Phaser.Math.Between(15, 100),
+      },
+    });
+
+    // add coins
+    this.coins = this.physics.add.group();
+
+    for (let i = 0; i < 10; i += 1) {
+      const x = Phaser.Math.Between(0, 800 - 15);
+      const y = Phaser.Math.Between(0, 300);
+      this.coins.create(x, y, 'coin');
     }
 
-    preload() {
-        this.load.image('sprBg0', '../src/assets/sprBg0.png');
-        this.load.image('sprBg1', '../src/assets/sprBg1.png');
-        this.load.spritesheet('sprExplosion', '../src/assets/sprExplosion.png', {
-            frameWidth: 32,
-            frameHeight: 32,
-        });
-        this.load.spritesheet('sprEnemy0', '../src/assets/sprEnemy0.png', {
-            frameWidth: 16,
-            frameHeight: 16,
-        });
-        this.load.image('sprEnemy1', '../src/assets/sprEnemy1.png');
-        this.load.spritesheet('sprEnemy2', '../src/assets/sprEnemy2.png', {
-            frameWidth: 16,
-            frameHeight: 16,
-        });
-        this.load.image('sprLaserEnemy0', '../src/assets/sprLaserEnemy0.png');
-        this.load.image('sprLaserPlayer', '../src/assets/sprLaserPlayer.png');
-        this.load.spritesheet('sprPlayer', '../src/assets/sprPlayer.png', {
-            frameWidth: 16,
-            frameHeight: 16,
-        });
+    // set velocity for coins
+    this.setObjectsVelocity(this.coins);
 
-        this.load.audio('sndExplode0', '../src/assets/sndExplode0.wav');
-        this.load.audio('sndExplode1', '../src/assets/sndExplode1.wav');
-        this.load.audio('sndLaser', '../src/assets/sndLaser.wav');
+    // check collision with jet and bomb
+    this.physics.add.collider(this.jet, this.bombs, this.endGame, null, this);
+
+    // set the random velocity of each bomb object
+    this.setObjectsVelocity(this.bombs);
+
+    // shoot when click
+    this.input.on('pointerdown', this.shoot, this);
+
+    // animation plays when bomb blasts
+    this.anims.create({
+      key: 'explode',
+      frames: this.anims.generateFrameNumbers('explosion'),
+      frameRate: 20,
+      hideOnComplete: true,
+    });
+
+    // add gunshot sound
+    this.gunshot = this.sound.add('gunshot');
+
+    // add coinhit sound
+    this.coinHit = this.sound.add('coinhit');
+
+    // Add end game sound
+    this.endSound = this.sound.add('endSound');
+
+    // set the score text
+    this.scoreText = this.add.text(15, 15, 'Score : 0', { fontSize: 32, fill: '#ff0000' });
+
+    this.physics.add.collider(this.jet, this.coins, this.collectCoins, null, this);
+  }
+
+  update() {
+    if (this.gameOver) {
+      this.scene.start('End', { totalScore: this.score });
     }
 
-    create() {
-        this.player = new Player(
-            this,
-            this.game.config.width * 0.5,
-            this.game.config.height * 0.5,
-            'sprPlayer',
-        );
+    // move background
+    this.sky.tilePositionY -= 0.8;
 
-        this.yourScore = this.add.text(40, 700, 'Score: 0', {
-            fontFamily: 'monospace',
-            fontSize: 20,
-            fontStyle: 'bold',
-            color: '#ffffff',
-        });
-
-        this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-        this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-        this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-        this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-        this.keySpace = this.input.keyboard.addKey(
-            Phaser.Input.Keyboard.KeyCodes.SPACE,
-        );
-
-        this.enemies = this.add.group();
-        this.enemyLasers = this.add.group();
-        this.playerLasers = this.add.group();
-        this.time.addEvent({
-            delay: 1000,
-            callback() {
-                let enemy = null;
-
-                if (Phaser.Math.Between(0, 10) >= 3) {
-                    enemy = new GunShip(
-                        this,
-                        Phaser.Math.Between(0, this.game.config.width),
-                        0,
-                    );
-                } else if (Phaser.Math.Between(0, 10) >= 5) {
-                    if (this.getEnemiesByType('ChaserShip').length < 5) {
-                        enemy = new ChaserShip(
-                            this,
-                            Phaser.Math.Between(0, this.game.config.width),
-                            0,
-                        );
-                    }
-                } else {
-                    enemy = new CarrierShip(
-                        this,
-                        Phaser.Math.Between(0, this.game.config.width),
-                        0,
-                    );
-                }
-
-                if (enemy !== null) {
-                    enemy.setScale(Phaser.Math.Between(10, 20) * 0.1);
-                    this.enemies.add(enemy);
-                }
-            },
-            callbackScope: this,
-            loop: true,
-        });
-        this.physics.add.collider(
-            this.playerLasers,
-            this.enemies,
-            (playerLaser, enemy) => {
-                if (enemy) {
-                    if (enemy.onDestroy !== undefined) {
-                        enemy.onDestroy();
-                    }
-                    enemy.explode(true);
-                    enemy.body = null;
-                    playerLaser.destroy();
-                    this.player.updateScore(enemy);
-                    this.yourScore.setText(`Score: ${this.player.getData('score')}`);
-                    this.player.updateScoretoLocal(this.player.getData('score'));
-                }
-            },
-        );
-
-        this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
-            if (!player.getData('isDead') && !enemy.getData('isDead')) {
-                player.explode(false);
-                player.onDestroy();
-                enemy.explode(true);
-            }
-        });
-
-        this.physics.add.overlap(this.player, this.enemyLasers, (player, laser) => {
-            if (!player.getData('isDead') && !laser.getData('isDead')) {
-                player.explode(false);
-                player.onDestroy();
-                laser.destroy();
-            }
-        });
-        this.anims.create({
-            key: 'sprEnemy0',
-            frames: this.anims.generateFrameNumbers('sprEnemy0'),
-            frameRate: 20,
-            repeat: -1,
-        });
-
-        this.anims.create({
-            key: 'sprEnemy2',
-            frames: this.anims.generateFrameNumbers('sprEnemy2'),
-            frameRate: 20,
-            repeat: -1,
-        });
-
-        this.anims.create({
-            key: 'sprExplosion',
-            frames: this.anims.generateFrameNumbers('sprExplosion'),
-            frameRate: 20,
-            repeat: 0,
-        });
-
-        this.anims.create({
-            key: 'sprPlayer',
-            frames: this.anims.generateFrameNumbers('sprPlayer'),
-            frameRate: 20,
-            repeat: -1,
-        });
-
-        this.sfx = {
-            explosions: [
-                this.sound.add('sndExplode0'),
-                this.sound.add('sndExplode1'),
-            ],
-            laser: this.sound.add('sndLaser'),
-        };
+    // check cursor keys and move jet accordingly
+    if (this.cursors.left.isDown) {
+      this.jet.setVelocityX(-150);
+    } else if (this.cursors.right.isDown) {
+      this.jet.setVelocityX(150);
+    } else if (this.cursors.up.isDown) {
+      this.jet.setVelocityY(-150);
+    } else if (this.cursors.down.isDown) {
+      this.jet.setVelocityY(150);
+    } else {
+      this.jet.setVelocity(0);
     }
 
-    getEnemiesByType(type) {
-        const arr = [];
-        for (let i = 0; i < this.enemies.getChildren().length; i += 1) {
-            const enemy = this.enemies.getChildren()[i];
-            if (enemy.getData('type') === type) {
-                arr.push(enemy);
-            }
-        }
-        return arr;
+    this.checkRepositionForObjects(this.bombs);
+    this.checkRepositionForObjects(this.coins);
+  }
+
+  // collect coins
+  collectCoins(jet, coin) {
+    if (this.model.soundOn) {
+      this.coinHit.play();
     }
+    this.score += 5;
+    this.scoreText.setText(`Score : ${this.score}`);
+    coin.disableBody(true, true);
+    const x = Phaser.Math.Between(15, 800 - 15);
+    const y = Phaser.Math.Between(0, 300);
+    coin.enableBody(true, x, y, true, true);
+    this.setObjectVelocity(coin);
+  }
 
-    update() {
-        if (!this.player.getData('isDead')) {
-            this.player.update();
-            const cursors = this.input.keyboard.createCursorKeys();
+  // fire the ammo
+  shoot() {
+    this.ammo = this.physics.add.image(this.jet.x, this.jet.y, 'ammo').setScale(0.2).setOrigin(0, 0.5);
+    this.ammo.setRotation(-Phaser.Math.PI2 / 4);
+    this.ammo.setVelocityY(-300);
+    this.physics.add.collider(this.ammo, this.bombs, this.destroyBomb, null, this);
+  }
 
-            if (cursors.up.isDown) {
-                this.player.moveUp();
-                this.player.anims.play('up', true);
-            } else if (cursors.down.isDown) {
-                this.player.moveDown();
-                this.player.anims.play('up', true);
-            }
-
-            if (cursors.left.isDown) {
-                this.player.moveLeft();
-                this.player.anims.play('left', true);
-                this.player.flipX = false;
-            } else if (cursors.right.isDown) {
-                this.player.moveRight();
-                this.player.anims.play('left', true);
-                this.player.flipX = true;
-            }
-
-            if (cursors.space.isDown) {
-                this.player.setData('isShooting', true);
-                this.player.anims.play('up', true);
-            } else {
-                this.player.setData(
-                    'timerShootTick',
-                    this.player.getData('timerShootDelay') - 1,
-                );
-                this.player.setData('isShooting', false);
-            }
-        }
-
-        for (let i = 0; i < this.enemies.getChildren().length; i += 1) {
-            const enemy = this.enemies.getChildren()[i];
-
-            enemy.update();
-            if (
-                enemy.x < -enemy.displayWidth ||
-                enemy.x > this.game.config.width + enemy.displayWidth ||
-                enemy.y < -enemy.displayHeight * 4 ||
-                enemy.y > this.game.config.height + enemy.displayHeight
-            ) {
-                if (enemy) {
-                    if (enemy.onDestroy !== undefined) {
-                        enemy.onDestroy();
-                    }
-
-                    enemy.destroy();
-                }
-            }
-        }
-        for (let i = 0; i < this.enemyLasers.getChildren().length; i += 1) {
-            const laser = this.enemyLasers.getChildren()[i];
-            laser.update();
-
-            if (
-                laser.x < -laser.displayWidth ||
-                laser.x > this.game.config.width + laser.displayWidth ||
-                laser.y < -laser.displayHeight * 4 ||
-                laser.y > this.game.config.height + laser.displayHeight
-            ) {
-                if (laser) {
-                    laser.destroy();
-                }
-            }
-        }
-
-        for (let i = 0; i < this.playerLasers.getChildren().length; i += 1) {
-            const laser = this.playerLasers.getChildren()[i];
-            laser.update();
-
-            if (
-                laser.x < -laser.displayWidth ||
-                laser.x > this.game.config.width + laser.displayWidth ||
-                laser.y < -laser.displayHeight * 4 ||
-                laser.y > this.game.config.height + laser.displayHeight
-            ) {
-                if (laser) {
-                    laser.destroy();
-                }
-            }
-        }
+  // destroy bomb when ammo hits the bomb
+  destroyBomb(ammo, bomb) {
+    this.score += 10;
+    this.scoreText.setText(`Score : ${this.score}`);
+    if (this.model.soundOn) {
+      this.gunshot.play();
     }
+    bomb.disableBody(true, true);
+    ammo.disableBody(true, true);
+    this.explosion = this.add.sprite(bomb.x, bomb.y, 'explosion').setScale(4);
+    this.explosion.play('explode');
+    const x = Phaser.Math.Between(15, 800 - 15);
+    const y = Phaser.Math.Between(0, 150);
+    bomb.enableBody(true, x, y, true, true);
+    this.setObjectVelocity(bomb);
+  }
+
+  // give random velocity to the group object
+  setObjectsVelocity(objects) {
+    const game = this;
+    objects.children.iterate((objcet) => {
+      game.setObjectVelocity(objcet);
+    });
+  }
+
+  // give random velocity to singal object
+  setObjectVelocity(object) {
+    const xVel = Phaser.Math.Between(-100, 100);
+    const yVel = Phaser.Math.Between(150, 200);
+    object.setVelocity(xVel, yVel);
+  }
+
+  // fuunction to end the game
+  endGame(jet, bomb) {
+    if (this.model.soundOn) {
+      this.endSound.play();
+    }
+    this.physics.pause();
+    jet.setTint(0XFF000);
+    bomb.setTint(0XFF000);
+    this.gameOver = true;
+  }
+
+  // check if the objects in a groub object requre
+  checkRepositionForObjects(objects) {
+    const game = this;
+    objects.children.iterate((object) => {
+      if (object.y > 600) {
+        game.resetPos(object);
+      }
+    });
+  }
+
+  // reset position of the object
+  resetPos(object) {
+    object.y = 0;
+    object.x = Phaser.Math.Between(15, 800 - 15);
+  }
 }
+/* eslint-enable class-methods-use-this */

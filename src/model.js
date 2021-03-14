@@ -1,32 +1,42 @@
-/* eslint-disable no-underscore-dangle */
 export default class Model {
-    constructor() {
-        this._soundOn = true;
-        this._musicOn = true;
-        this._bgMusicPlaying = false;
-    }
+  constructor() {
+    this.username = 'Guest';
+    this.soundon = true;
+    this.musicon = true;
+    this.bgMusicplaying = false;
+  }
 
-    set musicOn(value) {
-        this._musicOn = value;
-    }
+  set musicOn(value) {
+    this.musicon = value;
+  }
 
-    get musicOn() {
-        return this._musicOn;
-    }
+  get musicOn() {
+    return this.musicon;
+  }
 
-    set soundOn(value) {
-        this._soundOn = value;
-    }
+  set soundOn(value) {
+    this.soundon = value;
+  }
 
-    get soundOn() {
-        return this._soundOn;
-    }
+  get soundOn() {
+    return this.soundon;
+  }
 
-    set bgMusicPlaying(value) {
-        this._bgMusicPlaying = value;
-    }
+  set bgMusicPlaying(value) {
+    this.bgMusicplaying = value;
+  }
 
-    get bgMusicPlaying() {
-        return this._bgMusicPlaying;
+  get bgMusicPlaying() {
+    return this.bgMusicplaying;
+  }
+
+  set userName(value) {
+    if (value !== '') {
+      this.username = value;
     }
+  }
+
+  get userName() {
+    return this.username;
+  }
 }

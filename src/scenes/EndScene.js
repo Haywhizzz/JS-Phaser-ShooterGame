@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import Button from '../Objects/Button';
+import Button from '../objects/Button';
 import { submitScore } from '../Api/LeaderboardApi';
 
 export default class EndScene extends Phaser.Scene {

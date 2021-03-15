@@ -1,7 +1,7 @@
 # Javascript-Capstone Project: Build a Shooter Game
 
 <h1 align="center">
-  Shooter Game
+  JS Shooter Game
 </h1>
 
 > Final project in the Microverse JavaScript Curriculum

@@ -17,7 +17,7 @@ The main objective of this project was to design and build a platform game. The 
 ![screenshot](./assets/Welcome.png)
 ![screenshot](./assets/gamescene.png)
 
-Live version of the project: [Live version]()
+Live version of the project: [Live version](https://nervous-mcnulty-6b379e.netlify.app/)
 
 ## The game
 

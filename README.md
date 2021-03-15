@@ -12,6 +12,11 @@ Implementation of a Space Shooter Game built with the [Phaser 3](https://phaser.
 
 The main objective of this project was to design and build a platform game. The basics of the game are used from the [Space Shooter Game](https://learn.yorkcs.com/category/tutorials/gamedev/phaser-3/build-a-space-shooter-with-phaser-3/) using Phaser and Javascript among other technologies.
 
+### Scenes
+
+![screenshot](./assets/Welcome.png)
+![screenshot](./assets/gamescene.png)
+
 Live version of the project: [Live version]()
 
 ## The game
@@ -52,7 +57,7 @@ _npm required_ - [get npm](https://www.npmjs.com/get-npm)
 
 ### Installation
 
-You can always use the [live version]() to play right away or install it locally using these steps:
+You can always use the [live version](https://nervous-mcnulty-6b379e.netlify.app/) to play right away or install it locally using these steps:
 
 **Clone the repository by running this command in your terminal**
 

@@ -90,38 +90,6 @@ http://localhost:8080/
 ```
 npm run test
 ```
-### Scenes
-
-**Landing Scene**
-
-<p align="center">
-  <img src="./src/assets/landing-scene.PNG">
-</p>
-
-**Game Scene**
-
-<p align="center">
-  <img src="./src/assets/game-scene.png">
-</p>
-
-**Credits Scene**
-
-<p align="center">
-  <img src="./src/assets/credits-scene.png">
-</p>
-
-**Leaderboard Scene**
-
-<p align="center">
-  <img src="./src/assets/leaderboard-scene.png">
-</p>
-
-**Game Over Scene**
-
-<p align="center">
-  <img src="./src/assets/game-over-scene.png">
-</p>
-
 ## Technologies used
 
 - HTML5/CSS

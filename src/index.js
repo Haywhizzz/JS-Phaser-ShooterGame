@@ -8,7 +8,7 @@ import TitleScene from './scenes/TitleScene';
 import OptionsScene from './scenes/OptionsScene';
 import CreditsScene from './scenes/CreditsScene';
 import EndScene from './scenes/EndScene';
-import LeaderboardScene from './scenes/LeaderboardScene';
+import LeaderboardScene from './scenes/LeaderBoardScene';
 import Model from './model';
 
 class Game extends Phaser.Game {

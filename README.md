@@ -23,6 +23,17 @@ Live version of the project: [Live version](https://nervous-mcnulty-6b379e.netli
 
 The concept of game design is simple, as shown on screens. A jet in space shoots the bombs and collects coins to get scores. If the Jet collides with a bomb, the game is over. All assets are provided by code4cause.
 
+### Characters
+
+* Player: <div ><img src="assets/images/jet.png"></div>
+It can move at 4 directions, and use the right click on the mouse to shoot enemies.
+
+* Enemy: <div ><img src="assets/images/bomb.png"></div>
+Bomb: It will appear randomly at random velocity. You receive +10 every time you make it explode.
+
+* Collectible:  <div ><img src="src/assets/images/coin.png"></div>
+Coin: It will appear at a random velocity. You will receive +5 points every time you collect one successfully
+
 ## Instructions to Play
 
 - Enter your name.

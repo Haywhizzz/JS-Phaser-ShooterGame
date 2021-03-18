@@ -25,7 +25,7 @@ The concept of game design is simple, as shown on screens. A jet in space shoots
 
 ### Characters
 
-* Player: <div ><img src="assets/images/jet.png"></div>
+* Player: <div ><img src="assets/images/shooter.png"></div>
 It can move at 4 directions, and use the right click on the mouse to shoot enemies.
 
 * Enemy: <div ><img src="assets/images/bomb.png"></div>

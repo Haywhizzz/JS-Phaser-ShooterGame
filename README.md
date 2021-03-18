@@ -31,7 +31,7 @@ It can move at 4 directions, and use the right click on the mouse to shoot enemi
 * Enemy: <div ><img src="assets/images/bomb.png"></div>
 Bomb: It will appear randomly at random velocity. You receive +10 every time you make it explode.
 
-* Collectible:  <div ><img src="src/assets/images/coin.png"></div>
+* Collectible:  <div ><img src="assets/images/coin.png"></div>
 Coin: It will appear at a random velocity. You will receive +5 points every time you collect one successfully
 
 ## Instructions to Play
